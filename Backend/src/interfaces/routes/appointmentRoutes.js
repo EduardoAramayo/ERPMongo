@@ -1,0 +1,15 @@
+const router = require('express').Router();
+const AppointmentController = require('../controllers/AppointmentController');
+const AppointmentRepository = require('../../infrastructure/reporsitories/AppointmentRepository');
+const AppointmentService = require('../../application/services/AppointmentService');
+const { protect } = require('../middleware/authMiddleware');
+const repo = new AppointmentRepository();
+const srv = new AppointmentService(repo);
+const ctl = new AppointmentController(srv);
+router.use(protect);
+router.get('/', ctl.getAll);
+router.get('/:id', ctl.getById);
+router.post('/', ctl.create);
+router.put('/:id', ctl.update);
+router.delete('/:id', ctl.delete);
+module.exports = router;

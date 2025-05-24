@@ -1,0 +1,28 @@
+Reporte de pruebas unitarias - Backend
+
+Fecha de ejecución: 15/05/2025
+
+Resumen:
+Se ejecutaron pruebas unitarias usando Jest para los servicios principales del backend.  
+Todas las pruebas fueron ejecutadas en la carpeta /tests y cubren los métodos CRUD y funciones clave de los servicios.
+
+Servicios probados:
+- UserService
+  - getAll: retorna usuarios correctamente.
+  - getById: retorna usuario por ID.
+  - create: crea usuario.
+  - update: actualiza usuario.
+  - delete: elimina usuario.
+  - count: retorna cantidad de usuarios.
+  - findByEmail: retorna usuario por email.
+  - save: guarda usuario.
+
+Resultados:
+✔ Todos los tests de UserService pasaron correctamente.
+
+Notas:
+- Las pruebas se realizaron con mocks, no afectan la base de datos real.
+- Para ejecutar las pruebas se utilizó el comando: npx jest --verbose
+
+
+Fin del reporte.

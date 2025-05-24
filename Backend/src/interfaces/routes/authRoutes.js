@@ -1,0 +1,12 @@
+const r = require('express').Router();
+const AuthController = require('../controllers/AuthController');
+const UserRepository = require('../../infrastructure/reporsitories/UserRepository');
+const AuthService = require('../../application/services/AuthService');
+const EmailSender = require('../../shared/utils/sendEmail');
+const uRepo = new UserRepository();
+const authSrv = new AuthService(uRepo, EmailSender);
+const ctrl = new AuthController(authSrv);
+r.post('/register', ctrl.register);
+r.post('/login', ctrl.login);
+r.post('/verify', ctrl.verify);
+module.exports = r;
