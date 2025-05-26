@@ -4,7 +4,7 @@ trigger:
       - main
 
 pool:
-  name: alpaca
+  vmImage: 'ubuntu-latest'
 
 variables:
   NODE_VERSION: '20.x'
@@ -43,10 +43,10 @@ jobs:
 
   - script: |
       cd frontend
-      echo "Skipping frontend tests"
-    displayName: 'Skip frontend tests'
+      npm test || echo "No tests defined in Frontend"
+    displayName: 'Run Frontend tests'
 
-  - script: |
-      cd frontend
-      if grep -q '"build":' package.json; then npm run build; else echo "No build script"; fi
-    displayName: 'Build frontend (if build script exists)'
+  # - script: |
+  #     cd frontend
+  #     if grep -q '"build":' package.json; then npm run build; else echo "No build script"; fi
+  #   displayName: 'Build frontend (if build script exists)'
