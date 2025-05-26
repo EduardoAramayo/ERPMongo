@@ -4,7 +4,7 @@ trigger:
       - main
 
 pool:
-  vmImage: 'ubuntu-latest'
+  name: alpaca
 
 variables:
   NODE_VERSION: '20.x'
