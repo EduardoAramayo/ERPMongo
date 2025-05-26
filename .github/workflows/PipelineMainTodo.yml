@@ -2,9 +2,9 @@ name: ERP CI Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
   pull_request:
-    branches: [ "main" ]
+    branches: [main]
 
 jobs:
   build-and-test:
@@ -15,57 +15,37 @@ jobs:
         node-version: [20.x]
 
     steps:
-      - name: ⬇️ Checkout código
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: 🟢 Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js (sin cache)
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          check-latest: false  # para no fallar por lock en raíz
 
-      - name: 📦 Instalar dependencias Backend
-        working-directory: ./Backend
-        run: |
-          if [ -f package.json ]; then
-            npm ci
-          else
-            echo "No hay package.json en Backend"
-          fi
+      - name: Install Backend dependencies
+        working-directory: Backend
+        run: npm ci
 
-      - name: 🧪 Ejecutar pruebas Backend
-        working-directory: ./Backend
-        run: |
-          npm test || echo "No tests defined in Backend - skipping"
+      - name: Run Backend tests
+        working-directory: Backend
+        run: npm test || echo "No tests defined in Backend"
 
-      - name: ⚙️ Compilar Backend (si existe)
-        working-directory: ./Backend
+      - name: Build Backend (if build script exists)
+        working-directory: Backend
         run: |
-          if grep -q "\"build\":" package.json; then
-            npm run build
-          else
-            echo "No hay script de build en Backend"
-          fi
+          if grep -q '"build":' package.json; then npm run build; else echo "No build script"; fi
 
-      - name: 📦 Instalar dependencias frontend
-        working-directory: ./frontend
-        run: |
-          if [ -f package.json ]; then
-            npm ci
-          else
-            echo "No hay package.json en frontend"
-          fi
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
 
-      - name: 🧪 Ejecutar pruebas frontend
-        working-directory: ./frontend
-        run: |
-          npm test || echo "No tests defined in frontend - skipping"
+      - name: Run frontend tests
+        working-directory: frontend
+        run: npm test || echo "No tests defined in frontend"
 
-      - name: ⚙️ Compilar frontend (si existe)
-        working-directory: ./frontend
+      - name: Build frontend (if build script exists)
+        working-directory: frontend
         run: |
-          if grep -q "\"build\":" package.json; then
-            npm run build
-          else
-            echo "No hay script de build en frontend"
-          fi
+          if grep -q '"build":' package.json; then npm run build; else echo "No build script"; fi
