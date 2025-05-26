@@ -8,16 +8,40 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import Sidebar from '../../components/Sidebar';
 import usePrescriptions from './hooks/usePrescriptions';
 
+// Define the Prescription type (adjust fields as needed)
+type Prescription = {
+  _id: string;
+  patient: { _id: string; firstName: string; lastName: string } | string;
+  doctor: { _id: string; firstName: string; lastName: string; specialty: string } | string;
+  medications: { medicationId: string | { _id: string; name: string; quantity: number }; quantity: number }[];
+  date: string | Date;
+};
+
 const Prescriptions: React.FC = () => {
   const {
     prescriptions, patients, medications, doctors, form, setForm, editingId, setEditingId, createOrUpdate, deletePrescription
   } = usePrescriptions();
 
-  const handleEdit = (prescription: any) => {
+  // Type guard to check if patient is an object with _id
+  function isPatientObject(patient: Prescription['patient']): patient is { _id: string; firstName: string; lastName: string } {
+    return typeof patient === 'object' && patient !== null && '_id' in patient;
+  }
+
+  // Type guard to check if doctor is an object with _id
+  function isDoctorObject(doctor: Prescription['doctor']): doctor is { _id: string; firstName: string; lastName: string; specialty: string } {
+    return typeof doctor === 'object' && doctor !== null && '_id' in doctor;
+  }
+
+  const handleEdit = (prescription: Prescription) => {
     setForm({
-      patient: prescription.patient?._id || prescription.patient,
-      doctor: prescription.doctor?._id || prescription.doctor,
-      medications: prescription.medications,
+      patient: isPatientObject(prescription.patient) ? prescription.patient._id : prescription.patient,
+      doctor: isDoctorObject(prescription.doctor) ? prescription.doctor._id : prescription.doctor,
+      medications: prescription.medications.map(med => ({
+        medicationId: typeof med.medicationId === 'object' && med.medicationId !== null
+          ? med.medicationId._id
+          : med.medicationId,
+        quantity: med.quantity,
+      })),
       date: new Date(prescription.date),
     });
     setEditingId(prescription._id);
@@ -159,11 +183,11 @@ const Prescriptions: React.FC = () => {
                 <ListItemText
                   primary={
                     `Paciente: ${
-                      prescription.patient && typeof prescription.patient === 'object'
+                      isPatientObject(prescription.patient)
                         ? `${prescription.patient.firstName} ${prescription.patient.lastName}`
                         : prescription.patient
                     } | Doctor: ${
-                      prescription.doctor && typeof prescription.doctor === 'object'
+                      isDoctorObject(prescription.doctor)
                         ? `${prescription.doctor.firstName} ${prescription.doctor.lastName} (${prescription.doctor.specialty})`
                         : prescription.doctor
                     }`
@@ -171,9 +195,9 @@ const Prescriptions: React.FC = () => {
                   secondary={
                     <>
                       Medicamentos: {
-                        prescription.medications.map((med: any) => {
+                        prescription.medications.map((med: Prescription['medications'][number]) => {
                           // Si med.medicationId es objeto, muestra el nombre, si no, muestra el id
-                          if (med.medicationId && typeof med.medicationId === 'object' && med.medicationId.name) {
+                          if (med.medicationId && typeof med.medicationId === 'object' && 'name' in med.medicationId) {
                             return `${med.medicationId.name} (${med.quantity})`;
                           }
                           // Si no tiene nombre, muestra el id

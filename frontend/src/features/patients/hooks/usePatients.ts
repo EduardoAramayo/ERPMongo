@@ -9,6 +9,15 @@ interface Patient {
   email: string;
 }
 
+// Interfaz parcial para el error de la API
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
+
 const usePatients = () => {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [form, setForm] = useState<Omit<Patient, '_id'>>({ firstName: '', lastName: '', email: '' });
@@ -18,9 +27,10 @@ const usePatients = () => {
     try {
       const { data } = await api.get<Patient[]>('/patients');
       setPatients(data);
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as ApiError;
       console.error(error);
-      toast.error(error?.response?.data?.message || 'Error al obtener pacientes');
+      toast.error(err.response?.data?.message || 'Error al obtener pacientes');
     }
   };
 
@@ -39,9 +49,10 @@ const usePatients = () => {
       }
       setForm({ firstName: '', lastName: '', email: '' });
       await fetchPatients();
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as ApiError;
       console.error(error);
-      toast.error(error?.response?.data?.message || 'Error al guardar paciente');
+      toast.error(err.response?.data?.message || 'Error al guardar paciente');
     }
   };
 
@@ -56,9 +67,10 @@ const usePatients = () => {
         await api.delete(`/patients/${id}`);
         await fetchPatients();
         toast.success('Paciente eliminado correctamente');
-      } catch (error: any) {
+      } catch (error) {
+        const err = error as ApiError;
         console.error(error);
-        toast.error(error?.response?.data?.message || 'Error al eliminar paciente');
+        toast.error(err.response?.data?.message || 'Error al eliminar paciente');
       }
     }
   };

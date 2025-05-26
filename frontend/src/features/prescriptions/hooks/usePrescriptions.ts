@@ -30,6 +30,15 @@ interface Prescription {
   date: Date;
 }
 
+// Interfaz parcial para el error de la API
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
+
 const usePrescriptions = () => {
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -56,9 +65,10 @@ const usePrescriptions = () => {
       setPatients(patientsData.data);
       setMedications(medicationsData.data);
       setDoctors(doctorsData.data);
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as ApiError;
       console.error(error);
-      toast.error(error?.response?.data?.message || 'Error al obtener prescripciones');
+      toast.error(err.response?.data?.message || 'Error al obtener prescripciones');
     }
   };
 
@@ -79,9 +89,10 @@ const usePrescriptions = () => {
       }
       setForm({ patient: '', doctor: '', medications: [], date: new Date() });
       await fetchAllData();
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as ApiError;
       console.error(error);
-      toast.error(error?.response?.data?.message || 'Error al guardar prescripción');
+      toast.error(err.response?.data?.message || 'Error al guardar prescripción');
     }
   };
 
@@ -90,9 +101,10 @@ const usePrescriptions = () => {
       await api.delete(`/prescriptions/${id}`);
       await fetchAllData();
       toast.success('Prescripción eliminada correctamente');
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as ApiError;
       console.error(error);
-      toast.error(error?.response?.data?.message || 'Error al eliminar prescripción');
+      toast.error(err.response?.data?.message || 'Error al eliminar prescripción');
     }
   };
 
