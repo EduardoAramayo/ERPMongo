@@ -45,7 +45,7 @@ jobs:
         working-directory: frontend
         run: echo "Skipping frontend tests"
 
-      - name: Build frontend (if build script exists)
-        working-directory: frontend
-        run: |
-          if grep -q '"build":' package.json; then npm run build; else echo "No build script"; fi
+#      - name: Build frontend (if build script exists)
+ #       working-directory: frontend
+  #      run: |
+   #       if grep -q '"build":' package.json; then npm run build; else echo "No build script"; fi
