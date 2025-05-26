@@ -18,74 +18,41 @@ jobs:
       - name: ⬇️ Checkout código
         uses: actions/checkout@v4
 
-      - name: 🟢 Instalar Node.js ${{ matrix.node-version }}
+      - name: 🟢 Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
 
-      - name: 📦 Instalar dependencias Backend
-        working-directory: ./Backend
-        run: |
-          if [ -f "package.json" ]; then
-            if [ -f "package-lock.json" ]; then
-              npm ci
-            else
-              echo "package-lock.json faltante en Backend. Por favor agrégalo."
-              exit 1
-            fi
-          else
-            echo "No hay package.json en Backend"
-            exit 1
-          fi
+      # Cache Backend
+      - name: Cache Backend node_modules
+        uses: actions/cache@v3
+        with:
+          path: Backend/node_modules
+          key: ${{ runner.os }}-backend-${{ hashFiles('Backend/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-backend-
 
-      - name: ✅ Ejecutar pruebas Backend
-        working-directory: ./Backend
-        run: |
-          if [ -f "package.json" ] && grep -q "\"test\":" package.json; then
-            npm test
-          else
-            echo "No hay pruebas definidas en el Backend"
-          fi
+      - name: Instalar dependencias Backend
+        working-directory: Backend
+        run: npm ci
 
-      - name: ⚙️ Compilar Backend (opcional)
-        working-directory: ./Backend
-        run: |
-          if [ -f "package.json" ] && grep -q "\"build\":" package.json; then
-            npm run build
-          else
-            echo "No hay script de build en el Backend"
-          fi
+      - name: Ejecutar pruebas Backend
+        working-directory: Backend
+        run: npm test
 
-      - name: 📦 Instalar dependencias frontend
-        working-directory: ./frontend
-        run: |
-          if [ -f "package.json" ]; then
-            if [ -f "package-lock.json" ]; then
-              npm ci
-            else
-              echo "package-lock.json faltante en frontend. Por favor agrégalo."
-              exit 1
-            fi
-          else
-            echo "No hay package.json en frontend"
-            exit 1
-          fi
+      # Cache Frontend
+      - name: Cache Frontend node_modules
+        uses: actions/cache@v3
+        with:
+          path: frontend/node_modules
+          key: ${{ runner.os }}-frontend-${{ hashFiles('frontend/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-frontend-
 
-      - name: 🧪 Ejecutar pruebas frontend
-        working-directory: ./frontend
-        run: |
-          if [ -f "package.json" ] && grep -q "\"test\":" package.json; then
-            npm test
-          else
-            echo "No hay pruebas definidas en el frontend"
-          fi
+      - name: Instalar dependencias Frontend
+        working-directory: frontend
+        run: npm ci
 
-      - name: ⚙️ Compilar frontend
-        working-directory: ./frontend
-        run: |
-          if [ -f "package.json" ] && grep -q "\"build\":" package.json; then
-            npm run build
-          else
-            echo "No hay script de build en el frontend"
-          fi
+      - name: Ejecutar pruebas Frontend
+        working-directory: frontend
+        run: npm test
