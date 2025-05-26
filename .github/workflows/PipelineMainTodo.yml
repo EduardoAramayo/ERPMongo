@@ -24,62 +24,53 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
 
-      - name: 📦 Instalar dependencias backend
-        working-directory: ./backend
+      - name: 📦 Instalar dependencias Backend
+        working-directory: ./Backend
         run: |
           if [ -f "package.json" ]; then
-            npm ci
+            if [ -f "package-lock.json" ]; then
+              npm ci
+            else
+              echo "package-lock.json faltante en Backend. Por favor agrégalo."
+              exit 1
+            fi
           else
-            echo "No hay package.json en backend"
+            echo "No hay package.json en Backend"
+            exit 1
           fi
 
-      - name: ✅ Ejecutar pruebas backend
-        working-directory: ./backend
+      - name: ✅ Ejecutar pruebas Backend
+        working-directory: ./Backend
         run: |
           if [ -f "package.json" ] && grep -q "\"test\":" package.json; then
             npm test
           else
-            echo "No hay pruebas definidas en el backend"
+            echo "No hay pruebas definidas en el Backend"
           fi
 
-      - name: ⚙️ Compilar backend (opcional)
-        working-directory: ./backend
+      - name: ⚙️ Compilar Backend (opcional)
+        working-directory: ./Backend
         run: |
           if [ -f "package.json" ] && grep -q "\"build\":" package.json; then
             npm run build
           else
-            echo "No hay script de build en el backend"
+            echo "No hay script de build en el Backend"
           fi
 
-      - name: 📦 Instalar dependencias backend
-  working-directory: ./Backend
-  run: |
-    if [ -f "package.json" ]; then
-      if [ -f "package-lock.json" ]; then
-        npm ci
-      else
-        echo "package-lock.json is missing. Please add it."
-        exit 1
-      fi
-    else
-      echo "No hay package.json en backend"
-      exit 1
-    fi
-
       - name: 📦 Instalar dependencias frontend
-  working-directory: ./frontend
-  run: |
-    if [ -f "package.json" ]; then
-      if [ -f "package-lock.json" ]; then
-        npm ci
-      else
-        echo "package-lock.json is missing. Please add it."
-        exit 1
-      fi
-    else
-      echo "No hay package.json en frontend"
-      exit 1
-    fi
+        working-directory: ./frontend
+        run: |
+          if [ -f "package.json" ]; then
+            if [ -f "package-lock.json" ]; then
+              npm ci
+            else
+              echo "package-lock.json faltante en frontend. Por favor agrégalo."
+              exit 1
+            fi
+          else
+            echo "No hay package.json en frontend"
+            exit 1
+          fi
 
       - name: 🧪 Ejecutar pruebas frontend
         working-directory: ./frontend
