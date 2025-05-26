@@ -51,14 +51,35 @@ jobs:
             echo "No hay script de build en el backend"
           fi
 
+      - name: 📦 Instalar dependencias backend
+  working-directory: ./Backend
+  run: |
+    if [ -f "package.json" ]; then
+      if [ -f "package-lock.json" ]; then
+        npm ci
+      else
+        echo "package-lock.json is missing. Please add it."
+        exit 1
+      fi
+    else
+      echo "No hay package.json en backend"
+      exit 1
+    fi
+
       - name: 📦 Instalar dependencias frontend
-        working-directory: ./frontend
-        run: |
-          if [ -f "package.json" ]; then
-            npm ci
-          else
-            echo "No hay package.json en frontend"
-          fi
+  working-directory: ./frontend
+  run: |
+    if [ -f "package.json" ]; then
+      if [ -f "package-lock.json" ]; then
+        npm ci
+      else
+        echo "package-lock.json is missing. Please add it."
+        exit 1
+      fi
+    else
+      echo "No hay package.json en frontend"
+      exit 1
+    fi
 
       - name: 🧪 Ejecutar pruebas frontend
         working-directory: ./frontend
