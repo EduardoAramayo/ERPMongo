@@ -1,0 +1,64 @@
+name: ERP CI Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - name: ⬇️ Checkout código
+        uses: actions/checkout@v4
+
+      - name: 🟢 Instalar Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: 📦 Instalar dependencias backend
+        working-directory: ./backend
+        run: npm install
+
+      - name: ✅ Ejecutar pruebas backend
+        working-directory: ./backend
+        run: |
+          if [ -f "package.json" ] && grep -q "\"test\":" package.json; then
+            npm test
+          else
+            echo "No hay pruebas definidas en el backend"
+          fi
+
+      - name: ⚙️ Compilar backend (opcional)
+        working-directory: ./backend
+        run: |
+          if [ -f "package.json" ] && grep -q "\"build\":" package.json; then
+            npm run build
+          else
+            echo "No hay script de build en el backend"
+          fi
+
+      - name: 📦 Instalar dependencias frontend
+        working-directory: ./frontend
+        run: npm install
+
+      - name: 🧪 Ejecutar pruebas frontend
+        working-directory: ./frontend
+        run: |
+          if [ -f "package.json" ] && grep -q "\"test\":" package.json; then
+            npm test
+          else
+            echo "No hay pruebas definidas en el frontend"
+          fi
+
+      - name: ⚙️ Compilar frontend
+        working-directory: ./frontend
+        run: npm run build
