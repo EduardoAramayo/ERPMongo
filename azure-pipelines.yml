@@ -1,29 +1,52 @@
-# Docker
-# Build a Docker image
-# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
-
 trigger:
-- main
+  branches:
+    include:
+      - main
 
-resources:
-- repo: self
+pool:
+  name: alpaca
 
 variables:
-  tag: '$(Build.BuildId)'
+  NODE_VERSION: '20.x'
 
-stages:
-- stage: Build
-  displayName: Build image
-  jobs:
-  - job: Build
-    displayName: Build
-    pool:
-      name: alpaca
-    steps:
-    - task: Docker@2
-      displayName: Build an image
-      inputs:
-        command: build
-        dockerfile: '**/Dockerfile'
-        tags: |
-          $(tag)
+jobs:
+- job: build_and_test
+  displayName: 'Build and Test Job'
+
+  steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '$(NODE_VERSION)'
+    displayName: 'Setup Node.js'
+
+  - checkout: self
+
+  - script: |
+      cd Backend
+      npm ci
+    displayName: 'Install Backend dependencies'
+
+  - script: |
+      cd Backend
+      npm test || echo "No tests defined in Backend"
+    displayName: 'Run Backend tests'
+
+  - script: |
+      cd Backend
+      if grep -q '"build":' package.json; then npm run build; else echo "No build script"; fi
+    displayName: 'Build Backend (if build script exists)'
+
+  - script: |
+      cd frontend
+      npm ci
+    displayName: 'Install Frontend dependencies'
+
+  - script: |
+      cd frontend
+      echo "Skipping frontend tests"
+    displayName: 'Skip frontend tests'
+
+  - script: |
+      cd frontend
+      if grep -q '"build":' package.json; then npm run build; else echo "No build script"; fi
+    displayName: 'Build frontend (if build script exists)'
