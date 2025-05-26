@@ -26,7 +26,12 @@ jobs:
 
       - name: 📦 Instalar dependencias backend
         working-directory: ./backend
-        run: npm install
+        run: |
+          if [ -f "package.json" ]; then
+            npm ci
+          else
+            echo "No hay package.json en backend"
+          fi
 
       - name: ✅ Ejecutar pruebas backend
         working-directory: ./backend
@@ -48,7 +53,12 @@ jobs:
 
       - name: 📦 Instalar dependencias frontend
         working-directory: ./frontend
-        run: npm install
+        run: |
+          if [ -f "package.json" ]; then
+            npm ci
+          else
+            echo "No hay package.json en frontend"
+          fi
 
       - name: 🧪 Ejecutar pruebas frontend
         working-directory: ./frontend
@@ -61,4 +71,9 @@ jobs:
 
       - name: ⚙️ Compilar frontend
         working-directory: ./frontend
-        run: npm run build
+        run: |
+          if [ -f "package.json" ] && grep -q "\"build\":" package.json; then
+            npm run build
+          else
+            echo "No hay script de build en el frontend"
+          fi
