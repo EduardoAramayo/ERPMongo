@@ -1,6 +1,7 @@
 // src/pages/Dashboard.tsx
 import React from 'react';
-import { Box, Typography, Card, CardContent, Avatar, Stack, Grid } from '@mui/material';
+import { Box, Typography, Card, CardContent, Avatar, Stack } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import EventNoteIcon from '@mui/icons-material/EventNote';
 import LocalPharmacyIcon from '@mui/icons-material/LocalPharmacy';
@@ -40,23 +41,21 @@ const Dashboard: React.FC = () => {
         </Typography>
         <Grid container spacing={4}>
           {summaryData.map((item) => (
-            <Grid component="div" xs={12} md={4} key={item.title}>
-              <Card sx={{ borderRadius: 3, boxShadow: 3, bgcolor: item.color }}>
-                <CardContent>
-                  <Stack direction="row" alignItems="center" spacing={2}>
-                    <Avatar sx={{ bgcolor: 'white', width: 56, height: 56 }}>
-                      {item.icon}
-                    </Avatar>
-                    <Box>
-                      <Typography variant="h5" fontWeight={600}>
-                        {item.value}
-                      </Typography>
-                      <Typography color="text.secondary">{item.title}</Typography>
-                    </Box>
-                  </Stack>
-                </CardContent>
-              </Card>
-            </Grid>
+            <Card sx={{ borderRadius: 3, boxShadow: 3, bgcolor: item.color }}>
+              <CardContent>
+                <Stack direction="row" alignItems="center" spacing={2}>
+                  <Avatar sx={{ bgcolor: 'white', width: 56, height: 56 }}>
+                    {item.icon}
+                  </Avatar>
+                  <Box>
+                    <Typography variant="h5" fontWeight={600}>
+                      {item.value}
+                    </Typography>
+                    <Typography color="text.secondary">{item.title}</Typography>
+                  </Box>
+                </Stack>
+              </CardContent>
+            </Card>
           ))}
         </Grid>
         {/* Puedes agregar aquí más widgets o gráficos si lo deseas */}
