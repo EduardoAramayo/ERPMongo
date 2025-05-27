@@ -30,8 +30,6 @@ const Sidebar: React.FC = () => (
         { text: 'Medicamentos', to: '/medications' },
         { text: 'Prescripciones', to: '/prescriptions' },
         { text: 'Doctores', to: '/doctors' },
-        { text: 'Historial de Consultas por Paciente', to: '/reporte-historial-paciente' }, // Nuevo
-        { text: 'Inventario de Medicamentos', to: '/reporte-inventario-medicamentos' },    // Nuevo
       ].map(({ text, to }) => (
         <ListItemButton
           key={to}
