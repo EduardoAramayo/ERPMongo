@@ -10,7 +10,7 @@ import usePatients from './hooks/usePatients';
 
 const Patients: React.FC = () => {
   const {
-    patients, form, setForm, editingId, setEditingId, handleSubmit, handleEdit, handleDelete
+    patients, form, setForm, editingId, handleSubmit, handleEdit, handleDelete
   } = usePatients();
 
   return (

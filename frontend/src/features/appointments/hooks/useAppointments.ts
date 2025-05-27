@@ -25,6 +25,15 @@ interface Appointment {
   status: 'pendiente' | 'confirmada' | 'cancelada';
 }
 
+// Interfaz parcial para el error de la API
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
+
 const useAppointments = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -49,9 +58,10 @@ const useAppointments = () => {
       setAppointments(appointmentsData.data);
       setPatients(patientsData.data);
       setDoctors(doctorsData.data);
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as ApiError;
       console.error(error);
-      toast.error(error?.response?.data?.message || 'Error al obtener datos');
+      toast.error(err.response?.data?.message || 'Error al obtener datos');
     }
   };
 
@@ -70,11 +80,11 @@ const useAppointments = () => {
         await api.post('/appointments', form);
         toast.success('Cita creada correctamente');
       }
-      setForm({ patient: '', doctor: '', prescriptionId: '', date: new Date(), status: 'pendiente' });
       await fetchAllData();
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as ApiError;
       console.error(error);
-      toast.error(error?.response?.data?.message || 'Error al guardar cita');
+      toast.error(err.response?.data?.message || 'Error al guardar cita');
     }
   };
 
@@ -83,9 +93,10 @@ const useAppointments = () => {
       await api.delete(`/appointments/${id}`);
       await fetchAllData();
       toast.success('Cita eliminada correctamente');
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as ApiError;
       console.error(error);
-      toast.error(error?.response?.data?.message || 'Error al eliminar cita');
+      toast.error(err.response?.data?.message || 'Error al eliminar cita');
     }
   };
 

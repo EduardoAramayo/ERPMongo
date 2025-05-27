@@ -10,7 +10,7 @@ import useMedications from './hooks/useMedications';
 
 const Medications: React.FC = () => {
   const {
-    medications, form, setForm, editingId, setEditingId, handleSubmit, handleEdit, handleDelete
+    medications, form, setForm, editingId, handleSubmit, handleEdit, handleDelete
   } = useMedications();
 
   return (

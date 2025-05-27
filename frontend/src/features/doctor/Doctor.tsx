@@ -9,7 +9,7 @@ import useDoctor from './hooks/useDoctor';
 
 const Doctor: React.FC = () => {
   const {
-    doctors, form, setForm, editingId, setEditingId, handleSubmit, handleEdit, handleDelete
+    doctors, form, setForm, editingId, handleSubmit, handleEdit, handleDelete
   } = useDoctor();
 
   return (

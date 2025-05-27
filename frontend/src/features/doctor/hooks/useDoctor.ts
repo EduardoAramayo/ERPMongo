@@ -9,6 +9,15 @@ interface Doctor {
   specialty: string;
 }
 
+// Interfaz parcial para el error de la API
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
+
 const useDoctor = () => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [form, setForm] = useState<Omit<Doctor, '_id'>>({
@@ -22,9 +31,10 @@ const useDoctor = () => {
     try {
       const { data } = await api.get<Doctor[]>('/doctors');
       setDoctors(data);
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as ApiError;
       console.error(error);
-      toast.error(error?.response?.data?.message || 'Error al obtener doctores');
+      toast.error(err.response?.data?.message || 'Error al obtener doctores');
     }
   };
 
@@ -43,9 +53,10 @@ const useDoctor = () => {
       }
       setForm({ firstName: '', lastName: '', specialty: '' });
       fetchDoctors();
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as ApiError;
       console.error(error);
-      toast.error(error?.response?.data?.message || 'Error al guardar doctor');
+      toast.error(err.response?.data?.message || 'Error al guardar doctor');
     }
   };
 
@@ -60,9 +71,10 @@ const useDoctor = () => {
         await api.delete(`/doctors/${id}`);
         fetchDoctors();
         toast.success('Doctor eliminado correctamente');
-      } catch (error: any) {
+      } catch (error) {
+        const err = error as ApiError;
         console.error(error);
-        toast.error(error?.response?.data?.message || 'Error al eliminar doctor');
+        toast.error(err.response?.data?.message || 'Error al eliminar doctor');
       }
     }
   };

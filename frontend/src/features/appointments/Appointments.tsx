@@ -9,22 +9,59 @@ import Sidebar from '../../components/Sidebar';
 import useAppointments from './hooks/useAppointments';
 import api from '../../api/api';
 
+// Tipos explícitos
+interface Patient {
+  _id: string;
+  firstName: string;
+  lastName: string;
+}
+
+interface Doctor {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  specialty: string;
+}
+
+interface Prescription {
+  _id: string;
+  patient: string | Patient;
+  doctor: string | Doctor;
+  medications: string[]; // Replace with Medication[] if you have a Medication interface
+  date: string | Date;
+}
+
+interface Appointment {
+  _id: string;
+  patient: string | Patient;
+  doctor: string | Doctor;
+  prescriptionId?: string | Prescription;
+  date: string | Date;
+  status: 'pendiente' | 'confirmada' | 'cancelada';
+}
+
 const Appointments: React.FC = () => {
   const {
     appointments, patients, doctors, form, setForm, editingId, setEditingId, createOrUpdate, deleteAppointment
   } = useAppointments();
 
   // Obtener las prescripciones para el select
-  const [prescriptions, setPrescriptions] = useState<any[]>([]);
+  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   useEffect(() => {
     api.get('/prescriptions').then(res => setPrescriptions(res.data));
   }, []);
 
-  const handleEdit = (appointment: any) => {
+  const handleEdit = (appointment: Appointment) => {
     setForm({
-      patient: appointment.patient?._id || appointment.patient,
-      doctor: appointment.doctor?._id || appointment.doctor,
-      prescriptionId: appointment.prescriptionId?._id || appointment.prescriptionId || '',
+      patient: typeof appointment.patient === 'object' && appointment.patient !== null
+        ? appointment.patient._id
+        : appointment.patient,
+      doctor: typeof appointment.doctor === 'object' && appointment.doctor !== null
+        ? appointment.doctor._id
+        : appointment.doctor,
+      prescriptionId: (appointment.prescriptionId && typeof appointment.prescriptionId === 'object')
+        ? (appointment.prescriptionId as Prescription)._id
+        : appointment.prescriptionId || '',
       date: new Date(appointment.date),
       status: appointment.status,
     });
@@ -100,7 +137,7 @@ const Appointments: React.FC = () => {
                 select
                 label="Estado"
                 value={form.status}
-                onChange={e => setForm({ ...form, status: e.target.value as any })}
+                onChange={e => setForm({ ...form, status: e.target.value as 'pendiente' | 'confirmada' | 'cancelada' })}
                 required
               >
                 <MenuItem value="pendiente">Pendiente</MenuItem>
@@ -134,19 +171,19 @@ const Appointments: React.FC = () => {
                   <ListItemText
                     primary={`Paciente: ${
                       appointment.patient && typeof appointment.patient === 'object'
-                        ? `${appointment.patient.firstName} ${appointment.patient.lastName}`
+                        ? `${(appointment.patient as Patient).firstName} ${(appointment.patient as Patient).lastName}`
                         : appointment.patient
                     } | Doctor: ${
                       appointment.doctor && typeof appointment.doctor === 'object'
-                        ? `${appointment.doctor.firstName} ${appointment.doctor.lastName} (${appointment.doctor.specialty})`
+                        ? `${(appointment.doctor as Doctor).firstName} ${(appointment.doctor as Doctor).lastName} (${(appointment.doctor as Doctor).specialty})`
                         : appointment.doctor
                     }`}
                     secondary={`Fecha: ${new Date(appointment.date).toLocaleString()} | Estado: ${appointment.status} | Prescripción: ${
                       appointment.prescriptionId && typeof appointment.prescriptionId === 'object'
-                        ? (appointment.prescriptionId.patient && typeof appointment.prescriptionId.patient === 'object'
-                            ? `${appointment.prescriptionId.patient.firstName} ${appointment.prescriptionId.patient.lastName}`
-                            : appointment.prescriptionId.patient
-                          ) + ' - ' + new Date(appointment.prescriptionId.date).toLocaleDateString()
+                        ? ((appointment.prescriptionId as Prescription).patient && typeof (appointment.prescriptionId as Prescription).patient === 'object'
+                            ? `${((appointment.prescriptionId as Prescription).patient as Patient).firstName} ${((appointment.prescriptionId as Prescription).patient as Patient).lastName}`
+                            : (appointment.prescriptionId as Prescription).patient
+                          ) + ' - ' + new Date((appointment.prescriptionId as Prescription).date).toLocaleDateString()
                         : appointment.prescriptionId || 'N/A'
                     }`}
                   />

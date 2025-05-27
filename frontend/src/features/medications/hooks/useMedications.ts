@@ -10,6 +10,15 @@ interface Medication {
   expiryDate?: Date;
 }
 
+// Interfaz parcial para el error de la API
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
+
 const useMedications = () => {
   const [medications, setMedications] = useState<Medication[]>([]);
   const [form, setForm] = useState<Omit<Medication, '_id'>>({
@@ -23,9 +32,10 @@ const useMedications = () => {
     try {
       const { data } = await api.get<Medication[]>('/medications');
       setMedications(data);
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as ApiError;
       console.error(error);
-      toast.error(error?.response?.data?.message || 'Error al obtener medicamentos');
+      toast.error(err.response?.data?.message || 'Error al obtener medicamentos');
     }
   };
 
@@ -44,9 +54,10 @@ const useMedications = () => {
       }
       setForm({ name: '', description: '', quantity: 0 });
       fetchMedications();
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as ApiError;
       console.error(error);
-      toast.error(error?.response?.data?.message || 'Error al guardar medicamento');
+      toast.error(err.response?.data?.message || 'Error al guardar medicamento');
     }
   };
 
@@ -65,9 +76,10 @@ const useMedications = () => {
         await api.delete(`/medications/${id}`);
         fetchMedications();
         toast.success('Medicamento eliminado correctamente');
-      } catch (error: any) {
+      } catch (error) {
+        const err = error as ApiError;
         console.error(error);
-        toast.error(error?.response?.data?.message || 'Error al eliminar medicamento');
+        toast.error(err.response?.data?.message || 'Error al eliminar medicamento');
       }
     }
   };
