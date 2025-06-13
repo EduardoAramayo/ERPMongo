@@ -1,10 +1,11 @@
 // src/pages/Dashboard.tsx
 import React from 'react';
-import { Box, Typography, Card, CardContent, Avatar, Stack, Grid } from '@mui/material';
+import { Box, Typography, Card, CardContent, Avatar, Stack} from '@mui/material';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import EventNoteIcon from '@mui/icons-material/EventNote';
 import LocalPharmacyIcon from '@mui/icons-material/LocalPharmacy';
 import Sidebar from '../components/Sidebar';
+import { Grid } from '@mui/material';
 
 const summaryData = [
   {
@@ -40,7 +41,7 @@ const Dashboard: React.FC = () => {
         </Typography>
         <Grid container spacing={4}>
           {summaryData.map((item) => (
-            <Grid component="div" xs={12} md={4} key={item.title}>
+            <Grid xs={12} md={4} key={item.title}>
               <Card sx={{ borderRadius: 3, boxShadow: 3, bgcolor: item.color }}>
                 <CardContent>
                   <Stack direction="row" alignItems="center" spacing={2}>

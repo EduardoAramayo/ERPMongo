@@ -13,6 +13,8 @@ const Medications = lazy(() => import('../features/medications/Medications'));
 const Prescriptions = lazy(() => import('../features/prescriptions/Prescriptions'));
 const Appointments = lazy(() => import('../features/appointments/Appointments'));
 const Doctor = lazy(() => import('../features/doctor/Doctor'));
+const ReporteConsultasPaciente = lazy(() => import('../features/reports/ReporteConsultasPaciente'));
+const ReporteInventarioMedicamentos = lazy(() => import('../features/reports/ReporteInventarioMedicamentos'));
 
 // Layout con Sidebar para páginas internas
 const MainLayout: React.FC = () => (
@@ -57,6 +59,9 @@ const AppRoutes: React.FC = () => (
         <Route path="/prescriptions" element={<Prescriptions />} />
         <Route path="/appointments" element={<Appointments />} />
         <Route path="/doctors" element={<Doctor />} />
+        {/* Rutas de reportes */}
+        <Route path="/reportes/consultas-paciente" element={<ReporteConsultasPaciente />} />
+        <Route path="/reportes/inventario-medicamentos" element={<ReporteInventarioMedicamentos />} />
       </Route>
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
