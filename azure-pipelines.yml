@@ -1,10 +1,21 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  name: alpaca
+
+variables:
+  NODE_VERSION: '20.15.0'  
+
 jobs:
 - job: Backend
   displayName: 'Build Backend'
   steps:
     - task: NodeTool@0
       inputs:
-        versionSpec: '$(NODE_VERSION)'
+        versionSpec: '20.15.0'  
       displayName: 'Setup Node.js'
 
     - checkout: self
@@ -30,7 +41,7 @@ jobs:
   steps:
     - task: NodeTool@0
       inputs:
-        versionSpec: '$(NODE_VERSION)'
+        versionSpec: '20.15.0'  # Versión exacta aquí también
       displayName: 'Setup Node.js'
 
     - checkout: self
