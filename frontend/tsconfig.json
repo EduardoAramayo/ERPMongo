@@ -1,7 +1,10 @@
 {
   "compilerOptions": {
-    "types": ["jest", "node"]
+    "types": ["jest"],
+    "module": "commonjs",
+    "target": "esnext"
   },
+  "exclude": ["node_modules"],
   "files": [],
   "references": [
     { "path": "./tsconfig.app.json" },
