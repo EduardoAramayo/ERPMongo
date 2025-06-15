@@ -1,11 +1,10 @@
 // src/pages/Dashboard.tsx
 import React from 'react';
-import { Box, Typography, Card, CardContent, Avatar, Stack} from '@mui/material';
+import { Box, Typography, Card, CardContent, Avatar, Stack } from '@mui/material';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import EventNoteIcon from '@mui/icons-material/EventNote';
 import LocalPharmacyIcon from '@mui/icons-material/LocalPharmacy';
 import Sidebar from '../components/Sidebar';
-import { Grid } from '@mui/material';
 
 const summaryData = [
   {
@@ -39,9 +38,24 @@ const Dashboard: React.FC = () => {
         <Typography variant="subtitle1" color="text.secondary" mb={4}>
           Aquí podrás gestionar la información de la clínica y ver un resumen de tus datos.
         </Typography>
-        <Grid container spacing={4}>
+
+        {/* Reemplazamos Grid por Box con flex */}
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            gap: 4,
+          }}
+        >
           {summaryData.map((item) => (
-            <Grid xs={12} md={4} key={item.title}>
+            <Box
+              key={item.title}
+              sx={{
+                flex: 1,
+                minWidth: 0,
+                mb: { xs: 4, md: 0 },
+              }}
+            >
               <Card sx={{ borderRadius: 3, boxShadow: 3, bgcolor: item.color }}>
                 <CardContent>
                   <Stack direction="row" alignItems="center" spacing={2}>
@@ -57,10 +71,9 @@ const Dashboard: React.FC = () => {
                   </Stack>
                 </CardContent>
               </Card>
-            </Grid>
+            </Box>
           ))}
-        </Grid>
-        {/* Puedes agregar aquí más widgets o gráficos si lo deseas */}
+        </Box>
       </Box>
     </Box>
   );
