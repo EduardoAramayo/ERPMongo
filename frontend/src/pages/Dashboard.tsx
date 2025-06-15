@@ -1,6 +1,6 @@
 // src/pages/Dashboard.tsx
 import React from 'react';
-import { Box, Typography, Card, CardContent, Avatar, Stack} from '@mui/material';
+import { Box, Typography, Card, CardContent, Avatar, Stack } from '@mui/material';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import EventNoteIcon from '@mui/icons-material/EventNote';
 import LocalPharmacyIcon from '@mui/icons-material/LocalPharmacy';
@@ -48,7 +48,14 @@ const Dashboard: React.FC = () => {
           }}
         >
           {summaryData.map((item) => (
-            <Grid xs={12} md={4} key={item.title}>
+            <Box
+              key={item.title}
+              sx={{
+                flex: 1,
+                minWidth: 0,
+                mb: { xs: 4, md: 0 },
+              }}
+            >
               <Card sx={{ borderRadius: 3, boxShadow: 3, bgcolor: item.color }}>
                 <CardContent>
                   <Stack direction="row" alignItems="center" spacing={2}>
