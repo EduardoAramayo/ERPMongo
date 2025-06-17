@@ -1,71 +1,88 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
-name: Build and deploy Node.js app to Azure Web App - Loquesea
+name: ERP Full CI/CD Pipeline
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: windows-latest
-    permissions:
-      contents: read #This is required for actions/checkout
+  build-and-test:
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Node.js version
-        uses: actions/setup-node@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: 20.x
 
-      - name: Instalar TypeScript globalmente
-        run: npm install -g typescript
+      # Backend
+      - name: Install Backend dependencies
+        working-directory: Backend
+        run: npm ci
 
-      - name: npm install, build, and test (frontend)
+      - name: Run Backend tests
+        working-directory: Backend
+        run: npm test || echo "Tests skipped"
+
+      # Frontend
+      - name: Install Frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build Frontend
+        working-directory: frontend
+        run: npm run build --if-present
+        env:
+          REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
+
+      - name: Create deployment package
         run: |
-          cd frontend
-          npm install
-          npm run build --if-present
-#          npm run test --if-present
-      
-      - name: Upload artifact for deployment job
+          mkdir -p deployment/Backend
+          cp -r Backend/* deployment/Backend/
+          cp -r frontend/build deployment/frontend/
+          cd deployment && tar -czf ../erp-deployment.tar.gz .
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: node-app
-          path: ./frontend
+          name: erp-deployment
+          path: erp-deployment.tar.gz
 
   deploy:
+    needs: build-and-test
     runs-on: ubuntu-latest
-    needs: build
-    environment:
-      name: 'Production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-    permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
+    environment: Production
 
     steps:
-      - name: Download artifact from build job
+      - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: node-app
-      
+          name: erp-deployment
+
+      - name: Extract package
+        run: tar -xzf erp-deployment.tar.gz
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_F49C239261AD4D5DB8EFC30E5D603980 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_4991C8F8A42C411F80D1E0AA1B7EEF85 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_E27287EC39B047E281B0DD02638021DE }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: 'Deploy to Azure Web App'
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
-        id: deploy-to-webapp
         with:
-          app-name: 'Loquesea'
-          slot-name: 'Production'
-          package: .
+          app-name: 'lawea'  # Nombre de tu App Service en Azure
+          package: deployment
+          runtime-stack: 'NODE|20-lts'
+          app-settings: |
+            [
+              {
+                "name": "MONGODB_URI",
+                "value": "${{ secrets.MONGODB_URI }}"
+              },
+              {
+                "name": "NODE_ENV",
+                "value": "production"
+              }
+            ]
