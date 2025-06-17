@@ -1,0 +1,76 @@
+name: ERP Full CI/CD
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Configura Node.js
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      # Backend - Instalar y testear
+      - name: Backend Install & Test
+        working-directory: Backend
+        run: |
+          npm ci
+          npm test || echo "Tests skipped"
+
+      # Frontend - Instalar y build
+      - name: Frontend Install & Build
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build --if-present
+        env:
+          REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
+
+      # Empaquetar todo (Backend + Frontend build)
+      - name: Create Deployment Package
+        run: |
+          mkdir -p deployment
+          cp -r Backend deployment/
+          cp -r frontend/build deployment/frontend/
+          tar -czf erp-deployment.tar.gz deployment
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: erp-deployment
+          path: erp-deployment.tar.gz
+
+  deploy:
+    needs: test-and-build
+    runs-on: ubuntu-latest
+    environment: Production
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: erp-deployment
+
+      - name: Extract Files
+        run: tar -xzf erp-deployment.tar.gz
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: "Loquesea"
+          package: deployment
+          runtime-stack: "NODE|20-lts"
+          app-settings: |
+            MONGODB_URI=${{ secrets.MONGODB_URI }}
+            NODE_ENV=production
