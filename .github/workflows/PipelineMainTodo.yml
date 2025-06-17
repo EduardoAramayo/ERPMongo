@@ -40,7 +40,11 @@ jobs:
       - name: Install frontend dependencies
         working-directory: frontend
         run: npm ci
-
+        
+      - name: Validar dependencias
+        working-directory: Backend
+        run: npm install --dry-run || (echo "¡Desincronización detectada!" && exit 1)
+        
       - name: Skip frontend tests
         working-directory: frontend
         run: echo "Skipping frontend tests"
