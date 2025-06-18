@@ -26,13 +26,17 @@ jobs:
         working-directory: Backend
         run: npm test || echo "Tests skipped"
 
+      - name: Build Backend
+        working-directory: Backend
+        run: npm run build --if-present
+
       # Frontend
       - name: Install Frontend dependencies
-        working-directory: frontend
+        working-directory: Frontend
         run: npm ci
 
       - name: Build Frontend
-        working-directory: frontend
+        working-directory: Frontend
         run: npm run build --if-present
         env:
           REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
@@ -40,8 +44,11 @@ jobs:
       - name: Create deployment package
         run: |
           mkdir -p deployment/Backend
-          cp -r Backend/* deployment/Backend/
-          cp -r frontend/build deployment/frontend/
+          mkdir -p deployment/Frontend
+          cp -r Backend/dist deployment/Backend/
+          cp -r Backend/package.json deployment/Backend/
+          cp -r Backend/package-lock.json deployment/Backend/
+          cp -r Frontend/build deployment/Frontend/
           cd deployment && tar -czf ../erp-deployment.tar.gz .
 
       - name: Upload artifact
@@ -84,5 +91,13 @@ jobs:
               {
                 "name": "NODE_ENV",
                 "value": "production"
+              },
+              {
+                "name": "JWT_SECRET",
+                "value": "${{ secrets.JWT_SECRET }}"
+              },
+              {
+                "name": "PORT",
+                "value": "3000"
               }
             ]
