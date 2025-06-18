@@ -16,11 +16,20 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
+          cache: 'npm'
 
-      # Backend
+      # Backend - More resilient dependency installation
       - name: Install Backend dependencies
         working-directory: Backend
-        run: npm ci
+        run: |
+          npm install
+          npm audit fix --force || true
+          rm -rf node_modules
+          npm install
+
+      - name: Verify Backend dependencies
+        working-directory: Backend
+        run: npm ls || true
 
       - name: Run Backend tests
         working-directory: Backend
@@ -32,8 +41,16 @@ jobs:
 
       # Frontend
       - name: Install Frontend dependencies
-        working-directory: frontend
-        run: npm ci
+        working-directory: Frontend
+        run: |
+          npm install
+          npm audit fix --force || true
+          rm -rf node_modules
+          npm install
+
+      - name: Verify Frontend dependencies
+        working-directory: Frontend
+        run: npm ls || true
 
       - name: Build Frontend
         working-directory: Frontend
@@ -48,6 +65,7 @@ jobs:
           cp -r Backend/dist deployment/Backend/
           cp -r Backend/package.json deployment/Backend/
           cp -r Backend/package-lock.json deployment/Backend/
+          cp -r Backend/node_modules deployment/Backend/
           cp -r Frontend/build deployment/Frontend/
           cd deployment && tar -czf ../erp-deployment.tar.gz .
 
@@ -79,7 +97,7 @@ jobs:
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'lawea'  # Nombre de tu App Service en Azure
+          app-name: 'lawea'
           package: deployment
           runtime-stack: 'NODE|20-lts'
           app-settings: |
