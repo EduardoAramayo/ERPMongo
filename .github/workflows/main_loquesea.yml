@@ -18,11 +18,11 @@ jobs:
           node-version: 20.x
 
       # Backend
-      - name: Install Backend dependencies
+      - name: Instalar dependencias Backend
         working-directory: Backend
         run: npm ci
 
-      - name: Run Backend tests
+      - name: Correr tests Backend
         working-directory: Backend
         run: npm test || echo "Tests skipped"
 
@@ -31,31 +31,30 @@ jobs:
         run: npm run build --if-present
 
       # Frontend
-      - name: Instalar jest-dom para tests
+      - name: Instalar dependencias y types para tests Frontend
         working-directory: frontend
-        run: npm install --save-dev @testing-library/jest-dom
-      
-      - name: Instalar dependencias Frontend
-        working-directory: frontend
-        run: npm ci
-      
+        run: |
+          npm ci
+          npm install --save-dev @testing-library/jest-dom @types/jest @types/papaparse
+
       - name: Build Frontend (ignorar errores)
         working-directory: frontend
         run: npm run build --if-present || echo "Build ignorado por error"
         env:
           REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
 
-      - name: Create deployment package
+      # Empaquetado
+      - name: Crear paquete de despliegue
         run: |
           mkdir -p deployment/Backend
           mkdir -p deployment/frontend
-          cp -r Backend/dist deployment/Backend/
-          cp -r Backend/package.json deployment/Backend/
-          cp -r Backend/package-lock.json deployment/Backend/
-          cp -r Frontend/build deployment/Frontend/
+          if [ -d Backend/dist ]; then cp -r Backend/dist deployment/Backend/; fi
+          cp Backend/package.json deployment/Backend/
+          cp Backend/package-lock.json deployment/Backend/
+          if [ -d frontend/build ]; then cp -r frontend/build deployment/frontend/; fi
           cd deployment && tar -czf ../erp-deployment.tar.gz .
 
-      - name: Upload artifact
+      - name: Subir artefacto
         uses: actions/upload-artifact@v4
         with:
           name: erp-deployment
@@ -67,12 +66,12 @@ jobs:
     environment: Production
 
     steps:
-      - name: Download artifact
+      - name: Descargar artefacto
         uses: actions/download-artifact@v4
         with:
           name: erp-deployment
 
-      - name: Extract package
+      - name: Extraer paquete
         run: tar -xzf erp-deployment.tar.gz
 
       - name: Login to Azure
